@@ -14,6 +14,7 @@ jobs:
       - name: Install Dependencies
         run: pip install -r SuperKart_project/requirements.txt
       - name: Upload Dataset to Hugging Face Hub
+        working-directory: ${{ github.workspace }}
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python SuperKart_project/model_building/data_register.py
