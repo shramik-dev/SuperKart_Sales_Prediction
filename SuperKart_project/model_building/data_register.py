@@ -13,21 +13,19 @@ repo_type = "dataset"
 data_folder = "SuperKart_project/data"
 
 # Initialize API client
-api = HfApi(token=token)
+api = HfApi(token=os.getenv("HF_TOKEN"))
 
-# Step 1: Check if the dataset repo exists
+# Step 1: Check if the space exists
 try:
     api.repo_info(repo_id=repo_id, repo_type=repo_type)
-    print(f" Dataset '{repo_id}' already exists. Uploading new data...")
+    print(f"Space '{repo_id}' already exists. Using it.")
 except RepositoryNotFoundError:
-    print(f" Dataset '{repo_id}' not found. Creating it...")
-    create_repo(repo_id=repo_id, repo_type=repo_type, private=False, token=token)
-    print(f" Dataset '{repo_id}' created successfully.")
+    print(f"Space '{repo_id}' not found. Creating new space...")
+    create_repo(repo_id=repo_id, repo_type=repo_type, private=False)
+    print(f"Space '{repo_id}' created.")
 
-# Step 2: Upload your dataset folder
 api.upload_folder(
-    folder_path=data_folder,
+    folder_path="SuperKart_project/data",
     repo_id=repo_id,
     repo_type=repo_type,
 )
-print(f"Uploaded data from {data_folder} to Hugging Face Hub.")
