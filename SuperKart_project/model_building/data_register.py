@@ -8,9 +8,9 @@ token = os.getenv("HF_TOKEN")
 if not token:
     raise ValueError("Missing Hugging Face token. Please set HF_TOKEN in GitHub Actions secrets.")
 
-repo_id = "Shramik121/Superkart-dataset"
+repo_id = "Shramik121/Superkart"
 repo_type = "dataset"
-data_folder = "SuperKart_project/data"
+
 
 # Initialize API client
 api = HfApi(token=os.getenv("HF_TOKEN"))
