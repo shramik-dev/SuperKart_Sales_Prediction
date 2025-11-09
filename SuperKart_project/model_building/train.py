@@ -25,7 +25,7 @@ ytrain_path = "hf://datasets/Shramik121/superkart/ytrain.csv"
 ytest_path = "hf://datasets/Shramik121/superkart/ytest.csv"
 
 # Load data
-X train = pd.read_csv(Xtrain_path)
+Xtrain = pd.read_csv(Xtrain_path)
 Xtest = pd.read_csv(Xtest_path)
 ytrain = pd.read_csv(ytrain_path).iloc[:, 0]
 ytest = pd.read_csv(ytest_path).iloc[:, 0]
