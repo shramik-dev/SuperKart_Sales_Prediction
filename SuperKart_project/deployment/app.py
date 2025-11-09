@@ -6,7 +6,7 @@ import joblib
 # Download model
 model_path = hf_hub_download(
     repo_id="Shramik121/Superkart",
-    filename="best_superkart_sales_model_v1.joblib"  # Ensure this matches train.py save
+    filename="best_superkart_revenue_model_v1.joblib"  # Ensure this matches train.py save
 )
 model = joblib.load(model_path)
 

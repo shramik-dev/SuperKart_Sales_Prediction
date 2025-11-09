@@ -2,51 +2,79 @@ import pandas as pd
 import numpy as np
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error  # ← SPACE ADDED
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import xgboost as xgb
 import joblib
-from huggingface_hub import HfApi, create_repo, upload_folder
+from huggingface_hub import HfApi, create_repo
 from huggingface_hub.utils import RepositoryNotFoundError
 import mlflow
 import os
 
+# ----------------------------
 # MLflow setup
+# ----------------------------
 mlflow.set_experiment("SuperKart-Prediction-Experiment")
 
-# Hugging Face API
+# ----------------------------
+# Hugging Face setup
+# ----------------------------
 api = HfApi(token=os.getenv("HF_TOKEN"))
 
+# ----------------------------
 # Dataset paths
+# ----------------------------
 Xtrain_path = "hf://datasets/Shramik121/superkart/Xtrain.csv"
 Xtest_path = "hf://datasets/Shramik121/superkart/Xtest.csv"
 ytrain_path = "hf://datasets/Shramik121/superkart/ytrain.csv"
 ytest_path = "hf://datasets/Shramik121/superkart/ytest.csv"
 
+# ----------------------------
 # Load data
+# ----------------------------
 Xtrain = pd.read_csv(Xtrain_path)
 Xtest = pd.read_csv(Xtest_path)
 ytrain = pd.read_csv(ytrain_path).iloc[:, 0]
 ytest = pd.read_csv(ytest_path).iloc[:, 0]
 
-# Features
-numeric_features = ['Product_Weight', 'Product_Allocated_Area', 'Product_MRP',
-                    'Store_Establishment_Year', 'Product_Store_Sales_Total']
-categorical_features = ['Product_Id', 'Product_Sugar_Content', 'Product_Type',
-                        'Store_Id', 'Store_Size', 'Store_Location_City_Type', 'Store_Type']
+# ----------------------------
+# Define features
+# ----------------------------
+numeric_features = [
+    'Product_Weight',
+    'Product_Allocated_Area',
+    'Product_MRP',
+    'Store_Establishment_Year'
+]
 
-# Preprocessor
+categorical_features = [
+    'Product_Id',
+    'Product_Sugar_Content',
+    'Product_Type',
+    'Store_Id',
+    'Store_Size',
+    'Store_Location_City_Type',
+    'Store_Type'
+]
+
+# ----------------------------
+# Preprocessing pipeline
+# ----------------------------
 preprocessor = make_column_transformer(
     (StandardScaler(), numeric_features),
     (OneHotEncoder(handle_unknown='ignore'), categorical_features)
 )
 
-# Model
+# ----------------------------
+# Model setup
+# ----------------------------
 xgb_model = xgb.XGBRegressor(random_state=42, objective='reg:squarederror')
 model_pipeline = make_pipeline(preprocessor, xgb_model)
 
+# ----------------------------
 # Hyperparameter tuning
+# ----------------------------
 param_grid = {
     'xgbregressor__n_estimators': [100, 200],
     'xgbregressor__max_depth': [3, 5],
@@ -54,7 +82,9 @@ param_grid = {
     'xgbregressor__subsample': [0.8, 1.0],
 }
 
-# Train with MLflow
+# ----------------------------
+# Train and log with MLflow
+# ----------------------------
 with mlflow.start_run():
     grid_search = GridSearchCV(model_pipeline, param_grid, cv=3, n_jobs=-1)
     grid_search.fit(Xtrain, ytrain)
@@ -64,7 +94,7 @@ with mlflow.start_run():
     y_pred_train = best_model.predict(Xtrain)
     y_pred_test = best_model.predict(Xtest)
 
-    # Metrics
+    # Evaluation metrics
     train_rmse = np.sqrt(mean_squared_error(ytrain, y_pred_train))
     test_rmse = np.sqrt(mean_squared_error(ytest, y_pred_test))
     train_mae = mean_absolute_error(ytrain, y_pred_train)
@@ -80,28 +110,34 @@ with mlflow.start_run():
         "r2_score": r2
     })
 
-    # Save and log model
-    model_path = "best_superkart_sales_model_v1.joblib"
+    print(f"Train RMSE: {train_rmse:.3f}")
+    print(f"Test RMSE: {test_rmse:.3f}")
+    print(f"R² Score: {r2:.3f}")
+
+    # ----------------------------
+    # Save and upload model
+    # ----------------------------
+    model_path = "best_superkart_revenue_model_v1.joblib"
     joblib.dump(best_model, model_path)
     mlflow.log_artifact(model_path, artifact_path="model")
-    print(f"Model saved: {model_path}")
+    print(f"Model saved locally: {model_path}")
 
-    # Upload to Hugging Face
+    # Upload to Hugging Face Hub
     repo_id = "Shramik121/Superkart"
     repo_type = "model"
 
     try:
         api.repo_info(repo_id=repo_id, repo_type=repo_type)
-        print(f"Repo {repo_id} exists.")
+        print(f"Repo {repo_id} already exists.")
     except RepositoryNotFoundError:
         create_repo(repo_id=repo_id, repo_type=repo_type, private=False)
-        print(f"Created repo: {repo_id}")
+        print(f"Created new repo: {repo_id}")
 
-    # FIXED: Use same filename
     api.upload_file(
-        path_or_fileobj=model_path,  # ← Use the saved file
-        path_in_repo="best_superkart_sales_model_v1.joblib",
+        path_or_fileobj=model_path,
+        path_in_repo=model_path,
         repo_id=repo_id,
         repo_type=repo_type,
     )
-    print("Model uploaded to Hugging Face!")
+
+    print("✅ Model uploaded to Hugging Face successfully!")
