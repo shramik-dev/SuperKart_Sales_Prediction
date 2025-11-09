@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 import xgboost as xgb
@@ -63,7 +64,7 @@ xgb_model = xgb.XGBRegressor(random_state=42, objective='reg:squarederror')
 # Pipeline
 # ----------------------------
 model_pipeline = make_pipeline(preprocessor, xgb_model)
-    
+
 # Hyperparameter grid
 # --------------------------
 param_grid = {
