@@ -55,7 +55,7 @@ categorical_features = [
 preprocessor = make_column_transformer(
     (StandardScaler(), numeric_features),
     (OneHotEncoder(handle_unknown='ignore'), categorical_features)
-
+)
 # Model definition
 # --------------------------
 xgb_model = xgb.XGBRegressor(random_state=42, objective='reg:squarederror')
