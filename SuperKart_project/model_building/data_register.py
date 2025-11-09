@@ -7,7 +7,7 @@ repo_id = "Shramik121/superkart-dataset"
 repo_type = "dataset"
 
 # Initialize API client
-api = HfApi(token=os.getenv("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"))
+api = HfApi(token=os.getenv("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"))
 
 # Step 1: Check if the space exists
 try:
