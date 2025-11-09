@@ -2,72 +2,51 @@ import pandas as pd
 import numpy as np
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
-from sklearn.metrics import mean_squared_error, r2_score,mean_absolute_error
-import xgboost as xgb
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error  # ← SPACE ADDED
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+import xgboost as xgb
 import joblib
-from huggingface_hub import login, HfApi, create_repo
-from huggingface_hub.utils import RepositoryNotFoundError, HfHubHTTPError
+from huggingface_hub import HfApi, create_repo
+from huggingface_hub.utils import RepositoryNotFoundError
 import mlflow
 import os
 
-#mlflow.set_tracking_uri("http://localhost:8080")
+# MLflow setup
 mlflow.set_experiment("SuperKart-Prediction-Experiment")
 
-# Hugging Face API authentication
+# Hugging Face API
 api = HfApi(token=os.getenv("HF_TOKEN"))
+
+# Dataset paths
 Xtrain_path = "hf://datasets/Shramik121/superkart/Xtrain.csv"
 Xtest_path = "hf://datasets/Shramik121/superkart/Xtest.csv"
 ytrain_path = "hf://datasets/Shramik121/superkart/ytrain.csv"
 ytest_path = "hf://datasets/Shramik121/superkart/ytest.csv"
 
-# Load datasets
-Xtrain = pd.read_csv(Xtrain_path)
+# Load data
+X trainable = pd.read_csv(Xtrain_path)
 Xtest = pd.read_csv(Xtest_path)
-ytrain = pd.read_csv(ytrain_path)
-ytest = pd.read_csv(ytest_path)
+ytrain = pd.read_csv(ytrain_path).iloc[:, 0]
+ytest = pd.read_csv(ytest_path).iloc[:, 0]
 
-# If y is stored as DataFrame with one column, convert to Series
-if isinstance(ytrain, pd.DataFrame):
-    ytrain = ytrain.iloc[:, 0]
-if isinstance(ytest, pd.DataFrame):
-    ytest = ytest.iloc[:, 0]
-# Feature definitions
-numeric_features = [
-    'Product_Weight',                     # Product's weight
-    'Product_Allocated_Area',                # Product Allocated Area
-    'Product_MRP',         # 
-    'Store_Establishment_Year',  # 
-    'Product_Store_Sales_Total'
-]
-categorical_features = [
-    'Product_Id',   # 
-    'Product_Sugar_Content',      # 
-    'Product_Type',          # 
-    'Store_Id',  # 
-    'Store_Size',   # 
-    'Store_Location_City_Type',      # 
-    'Store_Type'
-]
+# Features
+numeric_features = ['Product_Weight', 'Product_Allocated_Area', 'Product_MRP',
+                    'Store_Establishment_Year', 'Product_Store_Sales_Total']
+categorical_features = ['Product_Id', 'Product_Sugar_Content', 'Product_Type',
+                        'Store_Id', 'Store_Size', 'Store_Location_City_Type', 'Store_Type']
 
-# Preprocessing
-# --------------------------
+# Preprocessor
 preprocessor = make_column_transformer(
     (StandardScaler(), numeric_features),
     (OneHotEncoder(handle_unknown='ignore'), categorical_features)
 )
-# Model definition
-# --------------------------
-xgb_model = xgb.XGBRegressor(random_state=42, objective='reg:squarederror')
 
-# Pipeline
-# ----------------------------
+# Model
+xgb_model = xgb.XGBRegressor(random_state=42, objective='reg:squarederror')
 model_pipeline = make_pipeline(preprocessor, xgb_model)
 
-# Hyperparameter grid
-# --------------------------
+# Hyperparameter tuning
 param_grid = {
     'xgbregressor__n_estimators': [100, 200],
     'xgbregressor__max_depth': [3, 5],
@@ -75,13 +54,10 @@ param_grid = {
     'xgbregressor__subsample': [0.8, 1.0],
 }
 
-
-# Train and log with MLflow
-# --------------------------
+# Train with MLflow
 with mlflow.start_run():
     grid_search = GridSearchCV(model_pipeline, param_grid, cv=3, n_jobs=-1)
     grid_search.fit(Xtrain, ytrain)
-
     best_model = grid_search.best_estimator_
 
     # Predictions
@@ -95,7 +71,7 @@ with mlflow.start_run():
     test_mae = mean_absolute_error(ytest, y_pred_test)
     r2 = r2_score(ytest, y_pred_test)
 
-    # Log metrics to MLflow
+    # Log metrics
     mlflow.log_metrics({
         "train_rmse": train_rmse,
         "test_rmse": test_rmse,
@@ -104,33 +80,28 @@ with mlflow.start_run():
         "r2_score": r2
     })
 
-    # Save model
+    # Save and log model
     model_path = "best_superkart_sales_model_v1.joblib"
     joblib.dump(best_model, model_path)
     mlflow.log_artifact(model_path, artifact_path="model")
-    print(f"Model saved as artifact at: {model_path}")
-
-  
-  
+    print(f"Model saved: {model_path}")
 
     # Upload to Hugging Face
-    repo_id = "Shramik121/superkart"
+    repo_id = "Shramik121/Superkart"
     repo_type = "model"
 
-    # Step 1: Check if the space exists
     try:
         api.repo_info(repo_id=repo_id, repo_type=repo_type)
-        print(f"Space '{repo_id}' already exists. Using it.")
+        print(f"Repo {repo_id} exists.")
     except RepositoryNotFoundError:
-        print(f"Space '{repo_id}' not found. Creating new space...")
         create_repo(repo_id=repo_id, repo_type=repo_type, private=False)
-        print(f"Space '{repo_id}' created.")
+        print(f"Created repo: {repo_id}")
 
-    # create_repo("churn-model", repo_type="model", private=False)
+    # FIXED: Use same filename
     api.upload_file(
-        path_or_fileobj="best_superkart_model_v1.joblib",
-        path_in_repo="best_superkart_model_v1.joblib",
+        path_or_fileobj=model_path,  # ← Use the saved file
+        path_in_repo="best_superkart_sales_model_v1.joblib",
         repo_id=repo_id,
         repo_type=repo_type,
     )
-    print("✅ Model uploaded to Hugging Face Hub successfully!")
+    print("Model uploaded to Hugging Face!")
