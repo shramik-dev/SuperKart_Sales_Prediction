@@ -8,7 +8,7 @@ token = os.getenv("HF_TOKEN")
 if not token:
     raise ValueError("Missing Hugging Face token. Please set HF_TOKEN in GitHub Actions secrets.")
 
-repo_id = "Shramik121/superkart-dataset"
+repo_id = "Shramik121/Superkart-dataset"
 repo_type = "dataset"
 data_folder = "Superkart_project/data"
 
