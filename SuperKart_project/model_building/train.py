@@ -16,10 +16,10 @@ mlflow.set_experiment("SuperKart-Prediction-Experiment")
 
 # Hugging Face API authentication
 api = HfApi(token=os.getenv("HF_TOKEN"))
-Xtrain_path = "hf://huggingface.co/datasets/Shramik121/superkart/Xtrain.csv"
-Xtest_path = "hf://huggingface.co/datasets/Shramik121/superkart/Xtest.csv"
-ytrain_path = "hf://huggingface.co/datasets/Shramik121/superkart/ytrain.csv"
-ytest_path = "hf://huggingface.co/datasets/Shramik121/superkart/ytest.csv"
+Xtrain_path = "hf://datasets/Shramik121/superkart/Xtrain.csv"
+Xtest_path = "hf://datasets/Shramik121/superkart/Xtest.csv"
+ytrain_path = "hf://datasets/Shramik121/superkart/ytrain.csv"
+ytest_path = "hf://datasets/Shramik121/superkart/ytest.csv"
 
 # Load datasets
 Xtrain = pd.read_csv(Xtrain_path)
