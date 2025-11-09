@@ -18,8 +18,10 @@ print("Dataset loaded successfully.")
 # ----------------------------
 # Define the target variable
 # ----------------------------
-Superkart_df = Superkart_df.dropna(subset=[target])
-target = 'Product_Store_Sales_Total'   # 1 if the customer purchased the package, else 0
+
+target = 'Product_Store_Sales_Total'
+Superkart_df = Superkart_df.dropna(subset=[target])  # 1 if the customer purchased the package, else 0
+   
 
 # ----------------------------
 # List of numerical features
