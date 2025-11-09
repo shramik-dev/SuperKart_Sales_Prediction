@@ -60,6 +60,9 @@ preprocessor = make_column_transformer(
 # --------------------------
 xgb_model = xgb.XGBRegressor(random_state=42, objective='reg:squarederror')
 
+# Pipeline
+# ----------------------------
+model_pipeline = make_pipeline(preprocessor, xgb_model)
     
 # Hyperparameter grid
 # --------------------------
