@@ -12,13 +12,13 @@ from huggingface_hub import login, HfApi
 # Define constants for the dataset and output paths
 api = HfApi(token=os.getenv("HF_TOKEN"))
 DATASET_PATH = "https://huggingface.co/datasets/Shramik121/superkart/SuperKart.csv"
-tourism_df = pd.read_csv("SuperKart_project/data/SuperKart.csv")
+Superkart_df = pd.read_csv("SuperKart_project/data/SuperKart.csv")
 print("Dataset loaded successfully.")
 
 # ----------------------------
 # Define the target variable
 # ----------------------------
-target = 'ProdTaken'   # 1 if the customer purchased the package, else 0
+target = 'Product_Store_Sales_Total'   # 1 if the customer purchased the package, else 0
 
 # ----------------------------
 # List of numerical features
@@ -48,12 +48,12 @@ categorical_features = [
 # ----------------------------
 # Combine features to form X (feature matrix)
 # ----------------------------
-X = tourism_df[numeric_features + categorical_features]
+X = Superkart_df[numeric_features + categorical_features]
 
 # ----------------------------
 # Define target vector y
 # ----------------------------
-y = tourism_df[target]
+y = Superkart_df[target]
 
 # ----------------------------
 # Split dataset into training and test sets
