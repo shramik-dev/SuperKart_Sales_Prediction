@@ -5,13 +5,13 @@ import joblib
 
 # Download model
 model_path = hf_hub_download(
-    repo_id="Shramik121/superkart",
+    repo_id="Shramik121/Superkart",
     filename="best_superkart_sales_model_v1.joblib"  # Ensure this matches train.py save
 )
 model = joblib.load(model_path)
 
-st.title("SuperKart Sales Prediction")
-st.write("Predict product sales based on features and store details.")
+st.title("SuperKart Revenue Prediction")
+st.write("Predict Revenue based on features and store details.")
 
 # Inputs (as before)
 Product_Id = st.text_input("Product ID", "FD6114")
@@ -45,6 +45,6 @@ input_data = pd.DataFrame([{
     'Store_Type': Store_Type
 }])
 
-if st.button("Predict Sales"):
+if st.button("Predict Revenue"):
     pred = model.predict(input_data)[0]
     st.success(f"**Predicted Sales: ₹{pred:,.2f}**")

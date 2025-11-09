@@ -30,8 +30,8 @@ numeric_features = [
     'Product_Weight',                     # Product's weight
     'Product_Allocated_Area',                # Product Allocated Area
     'Product_MRP',         # 
-    'Store_Establishment_Year',  # 
-    'Product_Store_Sales_Total'       # 
+    'Store_Establishment_Year'  # 
+                                 
 ]
 
 # ----------------------------
