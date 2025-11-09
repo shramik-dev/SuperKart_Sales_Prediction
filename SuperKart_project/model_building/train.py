@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import xgboost as xgb
 import joblib
-from huggingface_hub import HfApi, create_repo
+from huggingface_hub import HfApi, create_repo, upload_folder
 from huggingface_hub.utils import RepositoryNotFoundError
 import mlflow
 import os
