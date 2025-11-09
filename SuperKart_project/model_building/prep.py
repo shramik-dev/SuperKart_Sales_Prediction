@@ -11,13 +11,14 @@ from huggingface_hub import login, HfApi
 
 # Define constants for the dataset and output paths
 api = HfApi(token=os.getenv("HF_TOKEN"))
-DATASET_PATH = "https://huggingface.co/datasets/Shramik121/superkart/SuperKart.csv"
+DATASET_PATH = "hf://datasets/Shramik121/superkart/SuperKart.csv"
 Superkart_df = pd.read_csv("SuperKart_project/data/SuperKart.csv")
 print("Dataset loaded successfully.")
 
 # ----------------------------
 # Define the target variable
 # ----------------------------
+Superkart_df = Superkart_df.dropna(subset=[target])
 target = 'Product_Store_Sales_Total'   # 1 if the customer purchased the package, else 0
 
 # ----------------------------
@@ -64,11 +65,14 @@ Xtrain, Xtest, ytrain, ytest = train_test_split(
     random_state=42
 )
 
+print(f" Data split done: Train({Xtrain.shape}), Test({Xtest.shape})")
+
 Xtrain.to_csv("Xtrain.csv",index=False)
 Xtest.to_csv("Xtest.csv",index=False)
 ytrain.to_csv("ytrain.csv",index=False)
 ytest.to_csv("ytest.csv",index=False)
 
+print(" Train/Test datasets saved locally.")
 
 files = ["Xtrain.csv","Xtest.csv","ytrain.csv","ytest.csv"]
 
@@ -79,3 +83,4 @@ for file_path in files:
         repo_id="Shramik121/Superkart",
         repo_type="dataset",
     )
+    print(" All split files uploaded successfully to Hugging Face.")

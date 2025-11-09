@@ -4,17 +4,17 @@ from huggingface_hub import hf_hub_download
 import joblib
 
 # Download the model from the Model Hub
-model_path = hf_hub_download(repo_id="Shramik121/superkart-model", filename="best_superkart_model_v1.joblib")
+model_path = hf_hub_download(repo_id="Shramik121/superkart", filename="best_superkart_model_v1.joblib")
 
 # Load the model
 model = joblib.load(model_path)
 
 # Streamlit UI for Customer Churn Prediction
 st.title("Superkart Prediction")
-st.write("
+st.write("""
 Predict future **product sales** based on product features, store type, and location details.
 An accurate sales forecast helps optimize procurement, plan logistics, and support decision-making across departments.
-")
+""")
 
 # Collect user input
 Product_Id = st.text_input("Product ID", value="FD6114")
@@ -46,12 +46,10 @@ input_data = pd.DataFrame([{
     'Store_Type': Store_Type
 }])
 
-# Set the classification threshold
-classification_threshold = 0.45
 
-# Predict button
-if st.button("Predict"):
-    prob = model.predict_proba(input_data)[0,1]
-    pred = int(prob >= classification_threshold)
-    result = "Prediction sales" if pred == 1 else "prediction failed"
-    st.write(f"Prediction: Sales {result}")
+
+# Prediction
+# ----------------------------
+if st.button(" Predict Sales"):
+    predicted_sales = model.predict(input_data)[0]
+    st.success(f" **Predicted Sales:** ₹{predicted_sales:,.2f}")
