@@ -10,7 +10,7 @@ if not token:
 
 repo_id = "Shramik121/Superkart-dataset"
 repo_type = "dataset"
-data_folder = "Superkart_project/data"
+data_folder = "SuperKart_project/data"
 
 # Initialize API client
 api = HfApi(token=token)
