@@ -4,7 +4,7 @@ from huggingface_hub import hf_hub_download
 import joblib
 
 # Download the model from the Model Hub
-model_path = hf_hub_download(repo_id="Shramik121/superkart", filename="best_superkart_model_v1.joblib")
+model_path = hf_hub_download(repo_id="Shramik121/Superkart", filename="best_superkart_model_v1.joblib")
 
 # Load the model
 model = joblib.load(model_path)
