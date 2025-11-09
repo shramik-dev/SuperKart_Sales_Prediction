@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
+from sklearn.metrics import mean_squared_error, r2_score
 import xgboost as xgb
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
